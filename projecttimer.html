@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pomodoro Timer</title>
+<style>
+  body {
+    font-family: 'Times New Roman', serif;
+    font-size: x-large;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+    background-color: white;
+  }
+  .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background-color: white;
+    border-radius: 50%;
+    box-shadow: 0 0 2px #fff;
+    animation: move linear infinite;
+  }
+  @keyframes move {
+    from { transform: translateY(0px); }
+    to { transform: translateY(500px); }
+  }
+  #change-background {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+  }
+  #live-time {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+  #timer-title {
+    font-style: italic;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 20px;
+  }
+  #pomodoro-timer, #journal, #todo-list {
+    text-align: center;
+    margin-top: 20px;
+  }
+  textarea {
+    width: 80%;
+    height: 100px;
+  }
+</style>
+</head>
+<body>
+
+<div id="live-time"></div>
+
+<h2 id="timer-title">Pomodoro Timer</h2>
+
+<div id="pomodoro-timer">
+  <input type="number" id="time-set" min="1" max="60" value="25"> minutes
+  <button onclick="startTimer()">Start Timer</button>
+  <div id="timer-display">25:00</div>
+</div>
+
+<div id="change-background">
+  <select onchange="changeBackground(this.value)">
+    <option value="white">White</option>
+    <option value="blue">Blue</option>
+    <option value="red">Red</option>
+    <option value="green">Green</option>
+    <option value="lightpink">Light Pink</option>
+    <option value="cream">Cream</option>
+    <option value="grey">Grey</option>
+    <option value="lightgreen">Light Green</option>
+    <option value="yellow">Yellow</option>
+  </select>
+</div>
+
+<h3>My Journal</h3>
+<div id="journal">
+  <textarea id="journal-text" placeholder="Journal your thoughts here..."></textarea>
+  <button onclick="saveJournal()">Save Journal</button>
+</div>
+
+<h3>To-do List</h3>
+<div id="todo-list">
+  <input type="text" id="todo-input" placeholder="Add new todo">
+  <button onclick="addTodo()">Add Todo</button>
+  <ul id="todo-items"></ul>
+</div>
+
+<script>
+// Generate moving stars in the background
+for (let i = 0; i < 50; i++) {
+  const star = document.createElement('div');
+  star.className = 'star';
+  star.style.left = `${Math.random() * window.innerWidth}px`;
+  star.style.top = `${Math.random() * window.innerHeight}px`;
+  star.style.animationDuration = `${Math.random() * 5 + 5}s`; // 5 to 10 seconds for full animation
+  document.body.appendChild(star);
+}
+
+const liveTimeDisplay = document.getElementById('live-time');
+const timerDisplay = document.getElementById('timer-display');
+let interval;
+
+function updateLiveTime() {
+  const now = new Date();
+  liveTimeDisplay.textContent = now.toLocaleString();
+}
+
+setInterval(updateLiveTime, 1000);
+
+function startTimer() {
+  clearInterval(interval); // Clear existing timer
+  let duration = document.getElementById('time-set').value * 60; // Duration in seconds
+  updateTimerDisplay(duration);
+  interval = setInterval(function() {
+    duration -= 1;
+    updateTimerDisplay(duration);
+    if (duration <= 0) {
+      clearInterval(interval);
+      timerDisplay.textContent = "Time's up!";
+      alert('Time is up!'); // Simple alert, replace with a custom beep sound if desired
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  timerDisplay.textContent = `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+}
+
+function changeBackground(color) {
+  document.body.style.backgroundColor = color;
+}
+
+function saveJournal() {
+  const text = document.getElementById('journal-text').value;
+  const blob = new Blob([text], { type: 'text/plain' });
+  const anchor = document.createElement('a');
+  anchor.download = 'journal.txt';
+  anchor.href = window.URL.createObjectURL(blob);
+  anchor.click();
+  window.URL.revokeObjectURL(anchor.href);
+}
+
+function addTodo() {
+  const input = document.getElementById('todo-input');
+  const itemText = input.value.trim();
+  if (itemText !== "") {
+    const item = document.createElement('li');
+    item.textContent = itemText;
+    item.style.cursor = 'pointer';
+    item.addEventListener('click', function() {
+      this.style.textDecoration = this.style.textDecoration === 'line-through' ? '' : 'line-through';
+    });
+    document.getElementById('todo-items').appendChild(item);
+    input.value = ''; // Clear input
+  }
+ 
+}
+</script>
+
+</body>
+</html>
